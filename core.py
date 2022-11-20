@@ -24,24 +24,25 @@ class CoreGame:
     mine_count: int
     board: dict[tuple[int, int], TileState] = field(init=False, default_factory=dict)
     font: pygame.font.SysFont = field(init=False)
-    font_nerd: pygame.font.SysFont() = field(init=False)
+    font_nerd: pygame.font.SysFont = field(init=False)
     mines_set: bool = field(init=False, default=False)
 
     def __post_init__(self):
-        self.font = pygame.font.Font('assets/liberationserif.ttf', 28)
-        self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
+        self.font = pygame.font.Font('assets/liberationserif.ttf', 24)
+        self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 24)
 
     @property
-    def x_0(self) -> int:
-        return 100
+    def x_0(self) -> float:
+        # TODO: -1.5 is slightly questionable
+        return 400 - (self.width-1.5)/2 * 1.7320508075688772*self.hexagon_radius
 
     @property
-    def y_0(self) -> int:
-        return 100
+    def y_0(self) -> float:
+        return 300 - (self.height-0.5)/2 * 1.7320508075688772*self.hexagon_radius
 
     @property
     def hexagon_radius(self) -> float:
-        return 27.5
+        return (600 - 120) / (self.height*2)
 
     @property
     def size(self) -> float:
@@ -70,7 +71,7 @@ class CoreGame:
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
             j1 = j + j_off
-            if (i1, j1) in self.board and self.board[(i1, j1)] in {TileState.CLOSED_MINED, TileState.FLAG_MINED}:
+            if (i1, j1) in self.board and self.board[(i1, j1)] in {TileState.CLOSED_MINED, TileState.FLAG_MINED, TileState.DEAD}:
                 nearby_mine_count += 1
         return nearby_mine_count
 
@@ -135,15 +136,12 @@ class CoreGame:
 
     def draw_all(self) -> None:
         """Draw the tiles."""
-        self.canvas.blit(self.font.render(str(self._estimated_mines_remaining()), True, 0xffffffff), (1, 1))
+        self.canvas.blit(self.font.render(str(self._estimated_mines_remaining()), True, 0x00ff00ff), (5, 5))
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
             if state in {TileState.NOT_YET_GENERATED, TileState.CLOSED_SAFE, TileState.CLOSED_MINED}:
-                if state == TileState.CLOSED_MINED:  # TODO: remove cheat code
-                    draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xddaaaa)
-                else:
-                    draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaaaaaa)
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaaaaaa)
             elif state in {TileState.OPEN_SAFE}:
                 nearby_mine_count = self._get_nearby_mines(i, j)
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, HEX_COLOR[nearby_mine_count])

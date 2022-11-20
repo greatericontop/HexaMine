@@ -48,16 +48,16 @@ class Game:
     def run_medium_difficulty(self) -> None:
         self.playing = True
         clear_canvas(self.canvas)
-        width, height = 21, 16
-        mine_count = 44
+        width, height = 21, 13
+        mine_count = 45
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
     def run_hard_difficulty(self) -> None:
         self.playing = True
         clear_canvas(self.canvas)
-        width, height = 35, 16
-        mine_count = 104
+        width, height = 31, 16
+        mine_count = 84
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
@@ -78,12 +78,15 @@ class Game:
                     self.core.draw_all()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
-                    draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), 400, 50)
+                    draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), 400, 40)
+                    return
                 game_won = self.core.check_victory()
                 if game_won:
                     self.playing = False
+                    self.core.draw_all()
+                    self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
-                    draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), 400, 50)
+                    draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), 400, 40)
 
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
