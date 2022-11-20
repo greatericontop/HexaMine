@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-__version__ = 'alpha-1.0.0'
+__version__ = 'beta-1.0.0'
 
 import pygame
 
