@@ -18,12 +18,15 @@ EASY_RECT = pygame.Rect(X_CENTER-TITLE_W, 250-TITLE_H, 2*TITLE_W, 2*TITLE_H)
 MEDIUM_RECT = pygame.Rect(X_CENTER-TITLE_W, 375-TITLE_H, 2*TITLE_W, 2*TITLE_H)
 HARD_RECT = pygame.Rect(X_CENTER-TITLE_W, 500-TITLE_H, 2*TITLE_W, 2*TITLE_H)
 
+FPS = 60
+
 
 @dataclass
 class Game:
     canvas: pygame.Surface
     core: CoreGame = field(init=False, default=None)
     playing: bool = field(init=False, default=False)
+    endpoint: int = field(init=False, default=0)
 
     def run_menu(self) -> None:
         self.playing = False
@@ -49,23 +52,26 @@ class Game:
         self.playing = True
         clear_canvas(self.canvas)
         width, height = 21, 13
-        mine_count = 45
+        mine_count = 48
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
     def run_hard_difficulty(self) -> None:
         self.playing = True
         clear_canvas(self.canvas)
-        width, height = 31, 16
-        mine_count = 84
+        width, height = 31, 17
+        mine_count = 110
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
-    def tick_loop(self) -> None:
+    def tick_loop(self, number_tick: int) -> None:
         """Called every tick loop."""
         if self.playing:
             clear_canvas(self.canvas)
             self.core.draw_all()
+            self.canvas.blit(self.core.font.render(str(int((number_tick - self.endpoint) / FPS)), True, 0x5555ffff), (750, 5))
+        else:
+            self.endpoint = number_tick
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
@@ -75,6 +81,7 @@ class Game:
                 if not still_alive:
                     # game over
                     self.playing = False
+                    self.core.show_all_mines()
                     self.core.draw_all()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
@@ -83,6 +90,7 @@ class Game:
                 game_won = self.core.check_victory()
                 if game_won:
                     self.playing = False
+                    self.core.show_all_mines()
                     self.core.draw_all()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)

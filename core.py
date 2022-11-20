@@ -90,6 +90,12 @@ class CoreGame:
         flags = len([None for tile in self.board if self.board[tile] in {TileState.FLAG_SAFE, TileState.FLAG_MINED}])
         return self.mine_count - flags
 
+    def show_all_mines(self) -> None:
+        """Shows all mines"""
+        for i, j in self.board:
+            if self.board[(i, j)] == TileState.CLOSED_MINED:
+                self.board[(i, j)] = TileState.DEAD
+
     def check_victory(self) -> bool:
         """Check if you win or not."""
         opened = len([None for tile in self.board if self.board[tile] == TileState.OPEN_SAFE])
@@ -141,7 +147,7 @@ class CoreGame:
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
             if state in {TileState.NOT_YET_GENERATED, TileState.CLOSED_SAFE, TileState.CLOSED_MINED}:
-                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaaaaaa)
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0x888888)
             elif state in {TileState.OPEN_SAFE}:
                 nearby_mine_count = self._get_nearby_mines(i, j)
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, HEX_COLOR[nearby_mine_count])
@@ -207,4 +213,7 @@ class CoreGame:
         current_type = self.board[(i, j)]
         if current_type in {TileState.CLOSED_MINED, TileState.CLOSED_SAFE}:
             change_state = {TileState.CLOSED_MINED: TileState.FLAG_MINED, TileState.CLOSED_SAFE: TileState.FLAG_SAFE}
+            self.board[(i, j)] = change_state[current_type]
+        if current_type in {TileState.FLAG_SAFE, TileState.FLAG_MINED}:
+            change_state = {TileState.FLAG_MINED: TileState.CLOSED_MINED, TileState.FLAG_SAFE: TileState.CLOSED_SAFE}
             self.board[(i, j)] = change_state[current_type]

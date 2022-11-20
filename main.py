@@ -22,11 +22,13 @@ def main() -> None:
 
     game = Game(canvas)
     game.run_menu()
-    # game.run_easy_difficulty()
+
+    number_tick: int = 0
 
     while True:
+        number_tick += 1
         clock.tick(FPS)
-        game.tick_loop()
+        game.tick_loop(number_tick)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
