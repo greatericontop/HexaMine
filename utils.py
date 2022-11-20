@@ -13,6 +13,18 @@ class TileState(enum.Enum):
     CLOSED_SAFE = 1
     CLOSED_MINED = 2
     OPEN_SAFE = 3
+    FLAG_MINED = 4
+    FLAG_SAFE = 5
+    DEAD = 6
+
+
+def clear_canvas(canvas: pygame.Surface):
+    canvas.fill(0x202020)
+
+
+def draw_centered_text(canvas: pygame.Surface, text: pygame.Surface, x: float, y: float) -> None:
+    text_rect = text.get_rect()
+    canvas.blit(text, (x - text_rect.width/2, y - text_rect.height/2))
 
 
 def draw_hexagon(canvas: pygame.Surface,

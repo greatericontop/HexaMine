@@ -12,7 +12,8 @@ from utils import *
 
 
 NEARBY_TILES = [(1, -1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]
-MINE_COLOR = {1: 0xf9ffc1, 2: 0x82d48c, 3: 0xb20000, 4: 0x6e44b0, 5: 0x005a88, 6: 0x340d0d}
+MINE_COLOR = {1: 0xf9ffc1ff, 2: 0x82d48cff, 3: 0xb20000ff, 4: 0x6e44b0ff, 5: 0x005a88ff, 6: 0x340d0dff}
+HEX_COLOR = {0: 0xffffff, 1: 0xf9ffc1, 2: 0x82d48c, 3: 0xb20000, 4: 0x6e44b0, 5: 0x005a88, 6: 0x340d0d}
 
 
 @dataclass
@@ -28,7 +29,7 @@ class CoreGame:
 
     def __post_init__(self):
         self.font = pygame.font.Font('assets/liberationserif.ttf', 28)
-        # self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28) # TODO: add the font file
+        self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
 
     @property
     def x_0(self) -> int:
@@ -69,9 +70,30 @@ class CoreGame:
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
             j1 = j + j_off
-            if (i1, j1) in self.board and self.board[(i1, j1)] == TileState.CLOSED_MINED:
+            if (i1, j1) in self.board and self.board[(i1, j1)] in {TileState.CLOSED_MINED, TileState.FLAG_MINED}:
                 nearby_mine_count += 1
         return nearby_mine_count
+
+    def _get_nearby_flagged(self, i: int, j: int) -> int:
+        """Get the nearby flagged"""
+        nearby_flagged_count = 0
+        for i_off, j_off in NEARBY_TILES:
+            i1 = i + i_off
+            j1 = j + j_off
+            if (i1, j1) in self.board and self.board[(i1, j1)] in {TileState.FLAG_MINED, TileState.FLAG_SAFE}:
+                nearby_flagged_count += 1
+        return nearby_flagged_count
+
+    def _estimated_mines_remaining(self) -> int:
+        """Get the estimated (flags) count of mines left."""
+        flags = len([None for tile in self.board if self.board[tile] in {TileState.FLAG_SAFE, TileState.FLAG_MINED}])
+        return self.mine_count - flags
+
+    def check_victory(self) -> bool:
+        """Check if you win or not."""
+        opened = len([None for tile in self.board if self.board[tile] == TileState.OPEN_SAFE])
+        area = self.width*self.height - (self.width-1)//2
+        return opened == area - self.mine_count
 
     #
 
@@ -113,45 +135,49 @@ class CoreGame:
 
     def draw_all(self) -> None:
         """Draw the tiles."""
+        self.canvas.blit(self.font.render(str(self._estimated_mines_remaining()), True, 0xffffffff), (1, 1))
+
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
             if state in {TileState.NOT_YET_GENERATED, TileState.CLOSED_SAFE, TileState.CLOSED_MINED}:
                 if state == TileState.CLOSED_MINED:  # TODO: remove cheat code
-                    draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffaaff)
+                    draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xddaaaa)
                 else:
                     draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaaaaaa)
             elif state in {TileState.OPEN_SAFE}:
                 nearby_mine_count = self._get_nearby_mines(i, j)
-                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0x55ff55)
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, HEX_COLOR[nearby_mine_count])
                 if nearby_mine_count != 0:
-                    text = self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count])
-                    text_rect = text.get_rect()
-                    self.canvas.blit(text, (x - text_rect.width / 2, y - text_rect.height / 2))
+                    draw_centered_text(self.canvas, self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count]), x, y)
+            elif state in {TileState.FLAG_SAFE, TileState.FLAG_MINED}:
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xff5555)
+                draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0xffffff), x, y)
+            elif state == TileState.DEAD:
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xff5555)
+                draw_centered_text(self.canvas, self.font_nerd.render('\ufb8f', True, 0xff5555ff), x, y)
 
-    #
-
-    def handle_click(self, event: pygame.event.Event) -> None:
-        """Handle a `MOUSEBUTTONDOWN` event."""
-        x, y = event.pos
-        i, j = self._to_game(x, y)
+    def handle_click(self, event: pygame.event.Event) -> bool:
+        """Handle a `MOUSEBUTTONDOWN` event. Return whether you're still alive."""
         # check radius (of apothem)
-        for i, j in self.board:
-            x, y = self._to_canvas(i, j)
-            distance = math.sqrt((x - event.pos[0]) ** 2 + (y - event.pos[1]) ** 2)
+        for i1, j1 in self.board:
+            x1, y1 = self._to_canvas(i1, j1)
+            distance = math.sqrt((x1 - event.pos[0]) ** 2 + (y1 - event.pos[1]) ** 2)
             # Circle with radius of apothem. This restricts clicking on the edges/corners slightly but is more precise.
             if distance < 0.8660254037844386*self.hexagon_radius - 2:
                 if event.button == 1:
-                    self.open_tile(i, j)
-                elif event.button == 2:
-                    # TODO: do this
-                    print('not implemented')
+                    return self.open_tile(i1, j1)
+                if event.button == 3:
+                    self.flag_tile(i1, j1)
+                    return True
+        return True
 
-    def open_tile(self, i: int, j: int) -> None:
-        """Handle when a player left-clicks a tile."""
+    def open_tile(self, i: int, j: int, clicked_by_user: bool = True) -> bool:
+        """Handle when a player left-clicks a tile. Return whether you're still alive."""
         current_type = self.board[(i, j)]
         if current_type == TileState.CLOSED_MINED:
-            exit(0)  # TODO: you lose screen
-        elif current_type in {TileState.NOT_YET_GENERATED, TileState.CLOSED_SAFE}:
+            self.board[(i, j)] = TileState.DEAD
+            return False
+        if current_type in {TileState.NOT_YET_GENERATED, TileState.CLOSED_SAFE}:
             self.board[(i, j)] = TileState.OPEN_SAFE
             if not self.mines_set:  # first click
                 self.set_mines(remove_this=(i, j))
@@ -162,7 +188,25 @@ class CoreGame:
                     i1 = i + i_off
                     j1 = j + j_off
                     if (i1, j1) in self.board:
-                        self.open_tile(i1, j1)
-        # (don't respond to clicking on an open tile)
+                        result = self.open_tile(i1, j1, False)
+                        if not result:
+                            return False
+            return True
+        if current_type == TileState.OPEN_SAFE and clicked_by_user:  # chord (open nearby)
+            if self._get_nearby_mines(i, j) == self._get_nearby_flagged(i, j):
+                for i_off, j_off in NEARBY_TILES:
+                    i1 = i + i_off
+                    j1 = j + j_off
+                    if (i1, j1) in self.board:
+                        if self.board[(i1, j1)] not in {TileState.FLAG_SAFE, TileState.FLAG_MINED}:
+                            result = self.open_tile(i1, j1, False)
+                            if not result:
+                                return False
+            return True
+        return True
 
-
+    def flag_tile(self, i: int, j: int):
+        current_type = self.board[(i, j)]
+        if current_type in {TileState.CLOSED_MINED, TileState.CLOSED_SAFE}:
+            change_state = {TileState.CLOSED_MINED: TileState.FLAG_MINED, TileState.CLOSED_SAFE: TileState.FLAG_SAFE}
+            self.board[(i, j)] = change_state[current_type]

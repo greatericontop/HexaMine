@@ -9,6 +9,7 @@ __version__ = 'alpha-1.0.0'
 import pygame
 
 from game import Game
+from utils import clear_canvas
 
 FPS = 60
 
@@ -20,7 +21,8 @@ def main() -> None:
     clock = pygame.time.Clock()
 
     game = Game(canvas)
-    game.run_easy_difficulty()
+    game.run_menu()
+    # game.run_easy_difficulty()
 
     while True:
         clock.tick(FPS)
