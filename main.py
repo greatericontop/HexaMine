@@ -16,6 +16,8 @@ FPS = 60
 
 def main() -> None:
     pygame.init()
+    logo = pygame.image.load('assets/logo.png')
+    pygame.display.set_icon(logo)
     pygame.display.set_caption(f'HexaMine {__version__}')
     canvas = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
