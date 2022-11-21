@@ -137,7 +137,9 @@ class CoreGame:
     def show_all_mines(self, win: bool = False) -> None:
         """Shows all mines"""
         for tile in self.board:
-            if self.board[tile].mined and self.board[tile].flag != FlagType.POST_GAME_LOSS_CAUSE:
+            if (self.board[tile].mined
+                    and self.board[tile].flag != FlagType.POST_GAME_LOSS_CAUSE  # don't replace this
+                    and not self.board[tile].flagged):  # correctly flagged tiles keep their flags
                 assert self.board[tile].closed
                 self.board[tile].flag = FlagType.FLAGGED if win else FlagType.POST_GAME_LOSS
 
