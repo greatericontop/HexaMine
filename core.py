@@ -228,9 +228,13 @@ class CoreGame:
     def open_tile(self, i: int, j: int, clicked_by_user: bool = True) -> bool:
         """Handle when a player left-clicks a tile. Return whether you're still alive."""
         current_tile = self.board[(i, j)]
+        if current_tile.flagged and clicked_by_user:
+            # you can't open flags (but if they were auto-opened, they will still open)
+            return True
         if current_tile.mined:
             self.board[(i, j)].flag = FlagType.POST_GAME_LOSS_CAUSE
             return False
+
         if current_tile.closed:  # closed & safe
             self.board[(i, j)].flag = FlagType.OPEN
             if not self.mines_set:  # first click
