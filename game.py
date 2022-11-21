@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import pygame
@@ -27,6 +28,11 @@ class Game:
     core: CoreGame = field(init=False, default=None)
     playing: bool = field(init=False, default=False)
     endpoint: int = field(init=False, default=0)
+
+    def _calculate_time(self, tick: int) -> str:
+        minutes = int(math.floor(tick / 60))
+        seconds = tick % 60
+        return f'{minutes:02d}:{seconds:02d}'
 
     def run_menu(self) -> None:
         self.playing = False
@@ -69,7 +75,7 @@ class Game:
         if self.playing:
             clear_canvas(self.canvas)
             self.core.draw_all()
-            self.canvas.blit(self.core.font.render(str(int((number_tick - self.endpoint) / FPS)), True, 0x5555ffff), (750, 5))
+            self.canvas.blit(self.core.font.render(self._calculate_time(int((number_tick - self.endpoint) / FPS)), True, 0x5555ffff), (730, 5))
         else:
             self.endpoint = number_tick
 
