@@ -168,11 +168,6 @@ class CoreGame:
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
-            if (i, j) in [(0, 0), (2, 2), (4, 4)]:  # TODO: remove this
-                draw_centered_text(self.canvas,
-                                   pygame.font.Font('assets/liberationserif.ttf', 12).render(
-                                       f'{state.flag.name}, {state.tile.name}', True, 0xffffffff), x, y)
-
             if state.open_safe and state.mined:
                 raise RuntimeError(f'open & mined tile found @ {i=} {j=}...')
 
@@ -184,7 +179,6 @@ class CoreGame:
 
             elif state.flag == FlagType.POST_GAME_LOSS_CAUSE:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaa0000)
-                # TODO: use a different color maybe?
                 draw_centered_text(self.canvas, self.font_nerd.render('\ufb8f', True, 0xaa0000ff), x, y)
 
             # during game
