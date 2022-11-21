@@ -64,9 +64,9 @@ class Game:
         self.playing = True
         self.last_game_mode = 'easy'
         clear_canvas(self.canvas)
-        width, height, mine_count = 5, 4, 4
-        # width, height = 11, 8
-        # mine_count = 14
+        # width, height, mine_count = 5, 4, 4
+        width, height = 11, 8
+        mine_count = 14
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
