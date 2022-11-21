@@ -3,19 +3,65 @@
 from __future__ import annotations
 
 import enum
+from dataclasses import dataclass
 
 import pygame
 from pygame import draw
 
 
-class TileState(enum.Enum):
+# class TileState(enum.Enum):
+#     NOT_YET_GENERATED = 0
+#     CLOSED_SAFE = 1
+#     CLOSED_MINED = 2
+#     OPEN_SAFE = 3
+#     FLAG_MINED = 4
+#     FLAG_SAFE = 5
+#     DEAD = 6
+
+
+class FlagType(enum.Enum):
+    OPEN = 0  # tile has been opened
+    NONE_CLOSED = 1  # tile is closed and not marked
+    FLAGGED = 2  # tile is flagged
+    QUESTION = 3  # TODO
+    POST_GAME_LOSS = 4  # shows mines post-game loss (does nothing to safe tiles)
+    POST_GAME_LOSS_CAUSE = 5  # shows the mine you clicked on that made you lose
+
+
+class TileType(enum.Enum):
     NOT_YET_GENERATED = 0
-    CLOSED_SAFE = 1
-    CLOSED_MINED = 2
-    OPEN_SAFE = 3
-    FLAG_MINED = 4
-    FLAG_SAFE = 5
-    DEAD = 6
+    SAFE = 1
+    MINE = 2
+
+
+@dataclass
+class Tile:
+    tile: TileType = TileType.NOT_YET_GENERATED
+    flag: FlagType = FlagType.NONE_CLOSED
+
+    @property
+    def open_safe(self) -> bool:
+        return self.flag == FlagType.OPEN
+
+    @property
+    def closed(self) -> bool:
+        return not self.open_safe
+
+    @property
+    def safe(self) -> bool:
+        return self.tile in {TileType.SAFE, TileType.NOT_YET_GENERATED}
+
+    @property
+    def mined(self) -> bool:
+        return not self.safe
+
+    @property
+    def unmarked(self) -> bool:
+        return self.flag == FlagType.NONE_CLOSED
+
+    @property
+    def flagged(self) -> bool:
+        return self.flag in {FlagType.FLAGGED, FlagType.QUESTION}
 
 
 def clear_canvas(canvas: pygame.Surface):

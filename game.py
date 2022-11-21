@@ -106,9 +106,8 @@ class Game:
                     # game over
                     self.playing = False
                     self.show_result_menu = True
-                    self.core.show_all_mines()
                     clear_canvas(self.canvas)
-                    self.core.draw_all(show_flagged_incorrect=True)
+                    self.core.handle_defeat()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
                     draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), 400, 40)
@@ -117,9 +116,8 @@ class Game:
                 if game_won:
                     self.playing = False
                     self.show_result_menu = True
-                    self.core.show_all_mines(win=True)
                     clear_canvas(self.canvas)
-                    self.core.draw_all()
+                    self.core.handle_victory()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
                     draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), 400, 40)
