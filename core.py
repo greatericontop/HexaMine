@@ -13,7 +13,7 @@ from utils import *
 
 NEARBY_TILES = [(1, -1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]
 MINE_COLOR = {1: 0xf9ffc1ff, 2: 0x82d48cff, 3: 0xb20000ff, 4: 0x6e44b0ff, 5: 0x005a88ff, 6: 0x340d0dff}
-HEX_COLOR = {0: 0xffffff, 1: 0xf9ffc1, 2: 0x82d48c, 3: 0xb20000, 4: 0x6e44b0, 5: 0x005a88, 6: 0x340d0d}
+HEX_COLOR = {0: 0xffffff, 1: 0xeaff28, 2: 0x308d3c, 3: 0x7f0000, 4: 0x352054, 5: 0x00273c, 6: 0x340d0d}
 
 
 @dataclass
@@ -143,7 +143,7 @@ class CoreGame:
         for i, coordinate in enumerate(tiles):
             self.board[coordinate] = TileState.CLOSED_MINED if i < self.mine_count else TileState.CLOSED_SAFE
 
-    def draw_all(self) -> None:
+    def draw_all(self, show_flagged_incorrect: bool = False) -> None:
         """Draw the tiles."""
         if self._estimated_mines_remaining() != 0:
             self.canvas.blit(self.font.render(str(self._estimated_mines_remaining()), True, 0x00ff00ff), (5, 5))
@@ -158,8 +158,10 @@ class CoreGame:
                 if nearby_mine_count != 0:
                     draw_centered_text(self.canvas, self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count]), x, y)
             elif state in {TileState.FLAG_SAFE, TileState.FLAG_MINED}:
-                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xff5555)
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0xffffff), x, y)
+                if show_flagged_incorrect and state == TileState.FLAG_SAFE:
+                    draw_centered_text(self.canvas, self.font_nerd.render('\u2717', True, 0xff5555ff), x, y)
             elif state == TileState.DEAD:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xff5555)
                 draw_centered_text(self.canvas, self.font_nerd.render('\ufb8f', True, 0xff5555ff), x, y)
