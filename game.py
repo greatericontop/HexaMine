@@ -90,7 +90,7 @@ class Game:
                 game_won = self.core.check_victory()
                 if game_won:
                     self.playing = False
-                    self.core.show_all_mines()
+                    self.core.show_all_mines(win=True)
                     self.core.draw_all()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
