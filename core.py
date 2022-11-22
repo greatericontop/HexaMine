@@ -5,10 +5,14 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import pygame
 
-from utils import *
+from utils import FlagType, Tile, draw_hexagon, TileType, draw_centered_text, draw_right_align_text
+
+if TYPE_CHECKING:
+    from main import Main
 
 
 NEARBY_TILES = [(1, -1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -18,15 +22,18 @@ HEX_COLOR = {0: 0xffffff, 1: 0xeaff28, 2: 0x308d3c, 3: 0x7f0000, 4: 0x352054, 5:
 
 @dataclass
 class CoreGame:
+    main: Main
     canvas: pygame.Surface
     width: int
     height: int
     mine_count: int
 
     board: dict[tuple[int, int], Tile] = field(init=False, default_factory=dict)
+    mines_set: bool = field(init=False, default=False)
+    tick_start: int = field(init=False, default=None)
+
     font: pygame.font.SysFont = field(init=False)
     font_nerd: pygame.font.SysFont = field(init=False)
-    mines_set: bool = field(init=False, default=False)
 
     def __post_init__(self):
         self.font = pygame.font.Font('assets/liberationserif.ttf', 24)
@@ -163,8 +170,15 @@ class CoreGame:
 
     def draw_all(self, show_flagged_incorrect: bool = False) -> None:
         """Draw the tiles."""
-        if self._estimated_mines_remaining() != 0:
-            self.canvas.blit(self.font.render(str(self._estimated_mines_remaining()), True, 0x00ff00ff), (5, 5))
+        # mine count
+        self.canvas.blit(self.font_nerd.render(str(self._estimated_mines_remaining()), True, 0x00ff00ff), (5, 5))
+        # timer
+        if self.tick_start is None:
+            draw_right_align_text(self.canvas, self.font_nerd.render('\uf64f', True, 0x5555ffff), 795, 5)
+        else:
+            seconds = (self.main.number_tick - self.tick_start) // self.main.TPS
+            time_text = f'\uf64f {seconds // 60:02d}:{seconds % 60:02d}'
+            draw_right_align_text(self.canvas, self.font_nerd.render(time_text, True, 0x5555ffff), 795, 5)
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
@@ -234,6 +248,7 @@ class CoreGame:
             if not self.mines_set:  # first click
                 self.set_mines(remove_this=(i, j))
                 self.mines_set = True
+                self.tick_start = self.main.number_tick
             if self._get_nearby_mines(i, j) == 0:
                 # if there are no nearby mines, automatically open more
                 for i_off, j_off in NEARBY_TILES:

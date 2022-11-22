@@ -9,16 +9,6 @@ import pygame
 from pygame import draw
 
 
-# class TileState(enum.Enum):
-#     NOT_YET_GENERATED = 0
-#     CLOSED_SAFE = 1
-#     CLOSED_MINED = 2
-#     OPEN_SAFE = 3
-#     FLAG_MINED = 4
-#     FLAG_SAFE = 5
-#     DEAD = 6
-
-
 class FlagType(enum.Enum):
     OPEN = 0  # tile has been opened
     NONE_CLOSED = 1  # tile is closed and not marked
@@ -71,6 +61,11 @@ def clear_canvas(canvas: pygame.Surface):
 def draw_centered_text(canvas: pygame.Surface, text: pygame.Surface, x: float, y: float) -> None:
     text_rect = text.get_rect()
     canvas.blit(text, (x - text_rect.width/2, y - text_rect.height/2))
+
+
+def draw_right_align_text(canvas: pygame.Surface, text: pygame.Surface, x: float, y: float) -> None:
+    text_rect = text.get_rect()
+    canvas.blit(text, (x - text_rect.width, y))
 
 
 def draw_hexagon(canvas: pygame.Surface,

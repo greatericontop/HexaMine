@@ -6,38 +6,42 @@ from __future__ import annotations
 
 __version__ = 'beta-1.0.0'
 
+from dataclasses import dataclass, field
+from typing import ClassVar
+
 import pygame
 
 from game import Game
-from utils import clear_canvas
-
-FPS = 60
 
 
-def main() -> None:
-    pygame.init()
-    logo = pygame.image.load('assets/logo.png')
-    pygame.display.set_icon(logo)
-    pygame.display.set_caption(f'HexaMine {__version__}')
-    canvas = pygame.display.set_mode((800, 600))
-    clock = pygame.time.Clock()
+@dataclass
+class Main:
+    TPS: ClassVar[int] = 60
 
-    game = Game(canvas)
-    game.run_menu()
+    number_tick: int = field(init=False, default=0)
 
-    number_tick: int = 0
+    def main(self) -> None:
+        pygame.init()
+        logo = pygame.image.load('assets/logo.png')
+        pygame.display.set_icon(logo)
+        pygame.display.set_caption(f'HexaMine {__version__}')
+        canvas = pygame.display.set_mode((800, 600))
+        clock = pygame.time.Clock()
 
-    while True:
-        number_tick += 1
-        clock.tick(FPS)
-        game.tick_loop(number_tick)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-            game.handle_event(event)
+        game = Game(self, canvas)
+        game.run_menu()
+
+        while True:
+            self.number_tick += 1
+            clock.tick(self.TPS)
+            game.tick_loop()
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                game.handle_event(event)
 
 
 if __name__ == '__main__':
-    main()
+    Main().main()

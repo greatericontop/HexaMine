@@ -5,12 +5,16 @@ from __future__ import annotations
 import enum
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import pygame
 from pygame import draw
 
 from core import CoreGame
 from utils import clear_canvas, draw_centered_text
+
+if TYPE_CHECKING:
+    from main import Main
 
 
 TITLE_W = 270
@@ -25,8 +29,6 @@ RESULT_H = 20
 AGAIN_RECT = pygame.Rect(X_CENTER-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
 MENU_RECT = pygame.Rect(230-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
 
-FPS = 60
-
 
 class Playing(enum.Enum):
     MENU = 0
@@ -36,16 +38,12 @@ class Playing(enum.Enum):
 
 @dataclass
 class Game:
+    main: Main
     canvas: pygame.Surface
     core: CoreGame = field(init=False, default=None)
     playing: Playing = field(init=False, default=Playing.MENU)
     last_game_mode: str = field(init=False, default=None)
     endpoint: int = field(init=False, default=0)
-
-    def _calculate_time(self, tick: int) -> str:
-        minutes = int(math.floor(tick / 60))
-        seconds = tick % 60
-        return f'{minutes:02d}:{seconds:02d}'
 
     def run_menu(self) -> None:
         self.playing = Playing.MENU
@@ -73,7 +71,7 @@ class Game:
         # width, height, mine_count = 5, 4, 4
         width, height = 11, 8
         mine_count = 14
-        self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
+        self.core = CoreGame(self.main, self.canvas, width, height, mine_count)
         self.core.init()
 
     def run_medium_difficulty(self) -> None:
@@ -82,7 +80,7 @@ class Game:
         clear_canvas(self.canvas)
         width, height = 21, 13
         mine_count = 48
-        self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
+        self.core = CoreGame(self.main, self.canvas, width, height, mine_count)
         self.core.init()
 
     def run_hard_difficulty(self) -> None:
@@ -91,19 +89,16 @@ class Game:
         clear_canvas(self.canvas)
         width, height = 31, 17
         mine_count = 110
-        self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
+        self.core = CoreGame(self.main, self.canvas, width, height, mine_count)
         self.core.init()
 
     #
 
-    def tick_loop(self, number_tick: int) -> None:
+    def tick_loop(self) -> None:
         """Called every tick loop."""
-        if self.playing == Playing.MENU:
-            self.endpoint = number_tick
-        elif self.playing == Playing.CORE_GAME:
+        if self.playing == Playing.CORE_GAME:
             clear_canvas(self.canvas)
             self.core.draw_all()
-            self.canvas.blit(self.core.font.render(self._calculate_time(int((number_tick - self.endpoint) / FPS)), True, 0x5555ffff), (730, 5))
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
