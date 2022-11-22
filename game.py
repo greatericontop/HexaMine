@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import enum
 import math
 from dataclasses import dataclass, field
 
@@ -27,12 +28,17 @@ MENU_RECT = pygame.Rect(230-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
 FPS = 60
 
 
+class Playing(enum.Enum):
+    MENU = 0
+    CORE_GAME = 1
+    ENDING = 2
+
+
 @dataclass
 class Game:
     canvas: pygame.Surface
     core: CoreGame = field(init=False, default=None)
-    playing: bool = field(init=False, default=False)
-    show_result_menu: bool = field(init=False, default=False)
+    playing: Playing = field(init=False, default=Playing.MENU)
     last_game_mode: str = field(init=False, default=None)
     endpoint: int = field(init=False, default=0)
 
@@ -42,7 +48,7 @@ class Game:
         return f'{minutes:02d}:{seconds:02d}'
 
     def run_menu(self) -> None:
-        self.playing = False
+        self.playing = Playing.MENU
         clear_canvas(self.canvas)
         font = pygame.font.Font('assets/liberationserif.ttf', 50)
         draw_centered_text(self.canvas, font.render('HEXAMINE', True, 0xff55ffff), 400, 90)
@@ -61,7 +67,7 @@ class Game:
         draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff), 230, 575)
 
     def run_easy_difficulty(self) -> None:
-        self.playing = True
+        self.playing = Playing.CORE_GAME
         self.last_game_mode = 'easy'
         clear_canvas(self.canvas)
         # width, height, mine_count = 5, 4, 4
@@ -71,7 +77,7 @@ class Game:
         self.core.init()
 
     def run_medium_difficulty(self) -> None:
-        self.playing = True
+        self.playing = Playing.CORE_GAME
         self.last_game_mode = 'medium'
         clear_canvas(self.canvas)
         width, height = 21, 13
@@ -80,7 +86,7 @@ class Game:
         self.core.init()
 
     def run_hard_difficulty(self) -> None:
-        self.playing = True
+        self.playing = Playing.CORE_GAME
         self.last_game_mode = 'hard'
         clear_canvas(self.canvas)
         width, height = 31, 17
@@ -88,24 +94,35 @@ class Game:
         self.core = CoreGame(canvas=self.canvas, width=width, height=height, mine_count=mine_count)
         self.core.init()
 
+    #
+
     def tick_loop(self, number_tick: int) -> None:
         """Called every tick loop."""
-        if self.playing:
+        if self.playing == Playing.MENU:
+            self.endpoint = number_tick
+        elif self.playing == Playing.CORE_GAME:
             clear_canvas(self.canvas)
             self.core.draw_all()
             self.canvas.blit(self.core.font.render(self._calculate_time(int((number_tick - self.endpoint) / FPS)), True, 0x5555ffff), (730, 5))
-        else:
-            self.endpoint = number_tick
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
-        if self.playing:
+        if self.playing == Playing.MENU:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if EASY_RECT.collidepoint(mouse_pos):
+                    self.run_easy_difficulty()
+                elif MEDIUM_RECT.collidepoint(mouse_pos):
+                    self.run_medium_difficulty()
+                elif HARD_RECT.collidepoint(mouse_pos):
+                    self.run_hard_difficulty()
+
+        elif self.playing == Playing.CORE_GAME:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 still_alive = self.core.handle_click(event)
                 if not still_alive:
                     # game over
-                    self.playing = False
-                    self.show_result_menu = True
+                    self.playing = Playing.ENDING
                     clear_canvas(self.canvas)
                     self.core.handle_defeat()
                     self.core = None
@@ -114,14 +131,14 @@ class Game:
                     return
                 game_won = self.core.check_victory()
                 if game_won:
-                    self.playing = False
-                    self.show_result_menu = True
+                    self.playing = Playing.ENDING
                     clear_canvas(self.canvas)
                     self.core.handle_victory()
                     self.core = None
                     font = pygame.font.Font('assets/liberationserif.ttf', 50)
                     draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), 400, 40)
-        elif self.show_result_menu:
+
+        elif self.playing == Playing.ENDING:
             self.run_result_menu()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -133,15 +150,5 @@ class Game:
                     elif self.last_game_mode == 'hard':
                         self.run_hard_difficulty()
                 elif MENU_RECT.collidepoint(mouse_pos):
-                    self.show_result_menu = False
+                    self.playing = Playing.MENU
                     self.run_menu()
-        else:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if EASY_RECT.collidepoint(mouse_pos):
-                    self.run_easy_difficulty()
-                elif MEDIUM_RECT.collidepoint(mouse_pos):
-                    self.run_medium_difficulty()
-                elif HARD_RECT.collidepoint(mouse_pos):
-                    self.run_hard_difficulty()
-
