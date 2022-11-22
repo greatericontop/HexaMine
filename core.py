@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
 
 NEARBY_TILES = [(1, -1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]
-MINE_COLOR = {1: 0xf9ffc1ff, 2: 0x82d48cff, 3: 0xb20000ff, 4: 0x6e44b0ff, 5: 0x005a88ff, 6: 0x340d0dff}
-HEX_COLOR = {0: 0xffffff, 1: 0xeaff28, 2: 0x308d3c, 3: 0x7f0000, 4: 0x352054, 5: 0x00273c, 6: 0x340d0d}
+MINE_COLOR = {1: 0xf9ffc1ff, 2: 0x82d48cff, 3: 0xff6565ff, 4: 0x6e44b0ff, 5: 0x005a88ff, 6: 0x340d0dff}
+HEX_COLOR = {0: 0xffffff, 1: 0xeaff28, 2: 0x308d3c, 3: 0xff3232, 4: 0x352054, 5: 0x00273c, 6: 0x340d0d}
 
 
 @dataclass
@@ -96,13 +96,22 @@ class CoreGame:
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
             j1 = j + j_off
-            if (i1, j1) in self.board and self.board[(i1, j1)].flagged:
+            if (i1, j1) in self.board and self.board[(i1, j1)].flag == FlagType.FLAGGED:
                 nearby_flagged_count += 1
         return nearby_flagged_count
 
+    def _no_nearby_question(self, i: int, j: int) -> bool:
+        nearby_question_count = 0
+        for i_off, j_off in NEARBY_TILES:
+            i1 = i + i_off
+            j1 = j + j_off
+            if (i1, j1) in self.board and self.board[(i1, j1)].flag == FlagType.QUESTION:
+                nearby_question_count += 1
+        return nearby_question_count == 0
+
     def _estimated_mines_remaining(self) -> int:
         """Get the estimated (flags) count of mines left."""
-        flags = len([None for tile in self.board if self.board[tile].flagged])
+        flags = len([None for tile in self.board if self.board[tile].flag == FlagType.FLAGGED])
         return self.mine_count - flags
 
     #
@@ -145,7 +154,6 @@ class CoreGame:
             if (i1, j1) in self.board:
                 tiles.remove((i1, j1))
         random.shuffle(tiles)  # shuffle a copy and take the top few
-        print('[D] set_mines called!')
         for i, coordinate in enumerate(tiles):
             assert self.board[coordinate].closed
             self.board[coordinate].tile = TileType.MINE if i < self.mine_count else TileType.SAFE
@@ -157,7 +165,8 @@ class CoreGame:
         for tile in self.board:
             if (self.board[tile].mined
                     and self.board[tile].flag != FlagType.POST_GAME_LOSS_CAUSE  # don't replace this
-                    and not self.board[tile].flagged):  # correctly flagged tiles keep their flags
+                    and self.board[tile].flag != FlagType.FLAGGED):  # correctly flagged (not question) tiles keep their flags
+                # TODO: when losing, change CORRECT question flags to normal flags
                 assert self.board[tile].closed
                 self.board[tile].flag = FlagType.FLAGGED if win else FlagType.POST_GAME_LOSS
 
@@ -182,7 +191,7 @@ class CoreGame:
     def draw_all(self, show_flagged_incorrect: bool = False) -> None:
         """Draw the tiles."""
         # mine count
-        self.canvas.blit(self.font_nerd.render(str(self._estimated_mines_remaining()), True, 0x00ff00ff), (5, 5))
+        self.canvas.blit(self.font_nerd.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x00ff00ff), (5, 5))
         # timer
         if self.tick_start is None:
             draw_right_align_text(self.canvas, self.font_nerd.render('\uf64f', True, 0x5555ffff), 795, 5)
@@ -208,10 +217,15 @@ class CoreGame:
 
             # during game
 
-            elif state.flagged:
+            elif state.flag == FlagType.QUESTION:
+                # question flagged (& closed) tile
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
+                draw_centered_text(self.canvas, self.font_nerd.render('\uf128', True, 0x00aaaaff), x, y)
+
+            elif state.flag == FlagType.FLAGGED:
                 # flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
-                draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0xffffff), x, y)
+                draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0x55ffffff), x, y)
                 if state.safe and show_flagged_incorrect:  # avoid giving away whether flags are right or not
                     draw_centered_text(self.canvas, self.font_nerd.render('\u2717', True, 0xff5555ff), x, y)
 
@@ -271,7 +285,7 @@ class CoreGame:
                             return False
             return True
         if current_tile.open_safe and clicked_by_user:  # chord (open nearby)
-            if self._get_nearby_mines(i, j) == self._get_nearby_flagged(i, j):
+            if self._get_nearby_mines(i, j) == self._get_nearby_flagged(i, j) and self._no_nearby_question(i, j):
                 for i_off, j_off in NEARBY_TILES:
                     i1 = i + i_off
                     j1 = j + j_off
@@ -288,6 +302,9 @@ class CoreGame:
         if current_type.flagged:
             self.board[(i, j)].flag = FlagType.NONE_CLOSED
         elif current_type.unmarked:
-            self.board[(i, j)].flag = FlagType.FLAGGED
+            if pygame.key.get_pressed()[pygame.K_LSHIFT]:
+                self.board[(i, j)].flag = FlagType.QUESTION
+            else:
+                self.board[(i, j)].flag = FlagType.FLAGGED
         else:
             assert current_type.open_safe
