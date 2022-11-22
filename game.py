@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 
 TITLE_W = 270
 TITLE_H = 35
-RESULT_W = 80
+RESULT_W = 85
 RESULT_H = 20
-RESULT_X_OFFSET = 170
+RESULT_X_OFFSET = 180
 
 class Playing(enum.Enum):
     MENU = 0
@@ -44,6 +44,7 @@ class Game:
         self.hard_rect = pygame.Rect(self.main.x_center - TITLE_W, 500 - TITLE_H, 2 * TITLE_W, 2 * TITLE_H)
         self.again_rect = pygame.Rect(self.main.x_center - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
         self.menu_rect = pygame.Rect(self.main.x_center - RESULT_X_OFFSET - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
+        self.score_rect = pygame.Rect(self.main.x_center + RESULT_X_OFFSET - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
 
     def run_menu(self) -> None:
         self.playing = Playing.MENU
@@ -63,6 +64,8 @@ class Game:
         draw_centered_text(self.canvas, font.render('Play Again', True, 0xffffffff), self.main.x_center, 575)
         draw.rect(self.canvas, 0x00aa00, self.menu_rect)
         draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff), self.main.x_center - RESULT_X_OFFSET, 575)
+        draw.rect(self.canvas, 0x00aa00, self.score_rect)
+        draw_centered_text(self.canvas, font.render('Leaderboards', True, 0xffffffff), self.main.x_center + RESULT_X_OFFSET, 575)
 
     def run_easy_difficulty(self) -> None:
         self.playing = Playing.CORE_GAME
