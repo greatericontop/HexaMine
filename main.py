@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-__version__ = 'beta-1.0.0'
+__version__ = 'beta-1.1.0'
 
 from dataclasses import dataclass, field
 from typing import ClassVar
