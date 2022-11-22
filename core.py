@@ -42,16 +42,16 @@ class CoreGame:
     @property
     def x_0(self) -> float:
         # TODO: -1.5 is slightly questionable
-        return 400 - (self.width-1.5)/2 * 1.7320508075688772*self.hexagon_radius
+        return self.main.x_center - (self.width - 1.5) / 2 * 1.7320508075688772 * self.hexagon_radius
 
     @property
     def y_0(self) -> float:
         # TODO: this is slightly questionable as well
-        return 300 - (self.height-0.5)/2 * 1.7320508075688772*self.hexagon_radius
+        return self.main.y_center - (self.height-0.5)/2 * 1.7320508075688772*self.hexagon_radius
 
     @property
     def hexagon_radius(self) -> float:
-        return (600 - 120) / (self.height*2)
+        return (self.main.display_height - 120) / (self.height * 2)
 
     @property
     def size(self) -> float:
