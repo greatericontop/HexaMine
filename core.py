@@ -140,7 +140,10 @@ class CoreGame:
         tiles = list(self.board.keys())
         tiles.remove(remove_this)
         for i_off, j_off in NEARBY_TILES:
-            tiles.remove((remove_this[0] + i_off, remove_this[1] + j_off))
+            i1 = remove_this[0] + i_off
+            j1 = remove_this[1] + j_off
+            if (i1, j1) in self.board:
+                tiles.remove((i1, j1))
         random.shuffle(tiles)  # shuffle a copy and take the top few
         print('[D] set_mines called!')
         for i, coordinate in enumerate(tiles):
