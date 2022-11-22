@@ -41,21 +41,27 @@ class CoreGame:
 
     @property
     def x_0(self) -> float:
-        # TODO: -1.5 is slightly questionable
-        return self.main.x_center - (self.width - 1.5) / 2 * 1.7320508075688772 * self.hexagon_radius
+        """Find the X location of the top-left hexagon to center the board."""
+        # this one is more complicated
+        # calculate the X using the J
+        center_j = (self.width-1) // 2
+        x_off = self.size * (0.8660254037844386 * center_j)
+        return self.main.x_center - x_off
 
     @property
     def y_0(self) -> float:
-        # TODO: this is slightly questionable as well
-        return self.main.y_center - (self.height-0.5)/2 * 1.7320508075688772*self.hexagon_radius
+        """Find the Y location of the top-left hexagon to center the board."""
+        # the line through the middle will always have (self.height - 1) hexagons
+        # distance to the edge of the middle (smaller column) == center point of big column
+        return self.main.y_center - self.size * (self.height-1)/2
 
     @property
     def hexagon_radius(self) -> float:
-        return (self.main.display_height - 120) / (self.height * 2)
+        return (self.main.display_height - 115) / (self.height * 2)
 
     @property
     def size(self) -> float:
-        return 1.7320508075688772*self.hexagon_radius + 3
+        return 1.7320508075688772*self.hexagon_radius + 2.75
 
     def _to_canvas(self, game_i: int, game_j: int) -> tuple[float, float]:
         """Convert game i,j to canvas x,y."""
