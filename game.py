@@ -11,7 +11,7 @@ import pygame
 from pygame import draw
 
 from core import CoreGame
-from utils import clear_canvas, draw_centered_text
+from utils import clear_canvas, draw_centered_text, draw_hexagon
 
 if TYPE_CHECKING:
     from main import Main
@@ -51,6 +51,8 @@ class Game:
         clear_canvas(self.canvas)
         font = pygame.font.Font('assets/liberationserif.ttf', 50)
         draw_centered_text(self.canvas, font.render('HEXAMINE', True, 0xff55ffff), self.main.x_center, 90)
+        draw_hexagon(self.canvas, self.main.x_center-200, 90, 37.5, 0xff55ff)
+        draw_hexagon(self.canvas, self.main.x_center+200, 90, 37.5, 0xff55ff)
         draw.rect(self.canvas, 0x00aa00, self.easy_rect)
         draw_centered_text(self.canvas, font.render('Easy Difficulty', True, 0xffffffff), self.main.x_center, 250)
         draw.rect(self.canvas, 0xffaa00, self.medium_rect)
