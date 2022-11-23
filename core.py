@@ -242,7 +242,7 @@ class CoreGame:
 
             elif state.closed:
                 # closed (& unmarked) tile
-                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0x666666)
+                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0x444444)
 
             elif state.open_safe:
                 # safe & opened tile (the "normal" opened tile in game)
