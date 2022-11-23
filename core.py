@@ -33,13 +33,17 @@ class CoreGame:
     tick_start: int = field(init=False, default=None)
 
     font: pygame.font.Font = field(init=False)
+    font_nerd_16: pygame.font.Font = field(init=False)
+    font_nerd_20: pygame.font.Font = field(init=False)
     font_nerd: pygame.font.Font = field(init=False)
-    font_nerd_big: pygame.font.Font = field(init=False)
+    font_nerd_28: pygame.font.Font = field(init=False)
 
     def __post_init__(self):
         self.font = pygame.font.Font('assets/liberationserif.ttf', 24)
+        self.font_nerd_16 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 16)
+        self.font_nerd_20 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 20)
         self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 24)
-        self.font_nerd_big = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
+        self.font_nerd_28 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
 
     @property
     def x_0(self) -> float:
@@ -200,14 +204,14 @@ class CoreGame:
         :show_flagged_incorrect: After finishing the game, show incorrect flags.
         """
         # mine count
-        self.canvas.blit(self.font_nerd.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x00ff00ff), (5, 5))
+        self.canvas.blit(self.font_nerd_20.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x11ff11ff), (5, 5))
         # timer
         if self.tick_start is None:
-            draw_right_align_text(self.canvas, self.font_nerd.render('\uf64f', True, 0x5555ffff), 795, 5)
+            draw_right_align_text(self.canvas, self.font_nerd_20.render('\uf64f', True, 0x5555ffff), 795, 5)
         else:
             seconds = (self.main.number_tick - self.tick_start) // self.main.TPS
             time_text = f'\uf64f {seconds // 60:02d}:{seconds % 60:02d}'
-            draw_right_align_text(self.canvas, self.font_nerd.render(time_text, True, 0x5555ffff), 795, 5)
+            draw_right_align_text(self.canvas, self.font_nerd_20.render(time_text, True, 0x5555ffff), 795, 5)
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)
@@ -222,7 +226,7 @@ class CoreGame:
 
             elif state.flag == FlagType.POST_GAME_LOSS_CAUSE:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaa0000)
-                draw_centered_text(self.canvas, self.font_nerd.render('\ufb8f', True, 0xaa0000ff), x, y)
+                draw_centered_text(self.canvas, self.font_nerd_28.render('\ufb8f', True, 0xaa0000ff), x, y)
 
             # during game
 
@@ -231,14 +235,14 @@ class CoreGame:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf128', True, 0x00aaaaff), x, y)
                 if state.safe and show_flagged_incorrect:
-                    draw_centered_text(self.canvas, self.font_nerd_big.render('\u2717', True, 0xff5555ff), x, y)
+                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff5555ff), x, y)
 
             elif state.flag == FlagType.FLAGGED:
                 # flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0x55ffffff), x, y)
                 if state.safe and show_flagged_incorrect:
-                    draw_centered_text(self.canvas, self.font_nerd_big.render('\u2717', True, 0xff5555ff), x, y)
+                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff5555ff), x, y)
 
             elif state.closed:
                 # closed (& unmarked) tile
@@ -250,6 +254,8 @@ class CoreGame:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, HEX_COLOR[nearby_mine_count])
                 if nearby_mine_count != 0:
                     draw_centered_text(self.canvas, self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count]), x, y)
+                else:
+                    draw_centered_text(self.canvas, self.font_nerd_16.render('\ueaab', True, 0x666666ff), x, y)
 
             else:
                 raise RuntimeError(f'{i=}, {j=}  |  {state=}')
