@@ -83,7 +83,7 @@ class CoreGame:
         return game_i, game_j
 
     def _get_nearby_mines(self, i: int, j: int) -> int:
-        """Get the nearby"""
+        """Get the nearby mines."""
         nearby_mine_count = 0
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
@@ -93,7 +93,7 @@ class CoreGame:
         return nearby_mine_count
 
     def _get_nearby_flagged(self, i: int, j: int) -> int:
-        """Get the nearby flagged"""
+        """Get the nearby flagged tiles."""
         nearby_flagged_count = 0
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
@@ -103,13 +103,13 @@ class CoreGame:
         return nearby_flagged_count
 
     def _no_nearby_question(self, i: int, j: int) -> bool:
-        nearby_question_count = 0
+        """Get whether there are no nearby question flags."""
         for i_off, j_off in NEARBY_TILES:
             i1 = i + i_off
             j1 = j + j_off
             if (i1, j1) in self.board and self.board[(i1, j1)].flag == FlagType.QUESTION:
-                nearby_question_count += 1
-        return nearby_question_count == 0
+                return False
+        return True
 
     def _estimated_mines_remaining(self) -> int:
         """Get the estimated (flags) count of mines left."""
