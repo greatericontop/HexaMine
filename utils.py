@@ -71,7 +71,7 @@ def draw_right_align_text(canvas: pygame.Surface, text: pygame.Surface, x: float
 def draw_hexagon(canvas: pygame.Surface,
                  center_x: float, center_y: float,
                  radius: float,
-                 color: int | tuple[int, int, int],
+                 color: int,
                  ) -> None:
     """Draws a hexagon with the given center and size"""
     apo = radius * 0.8660254037844386
