@@ -127,9 +127,7 @@ class CoreGame:
             j_max = MAIN_WIDTH
             for j in range(j_min, j_max + 1):
                 self.board[(i, j)] = Tile()
-                # TODO: draw these in the main tick loop????
                 x, y = self._to_canvas(i, j)
-                draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xff5555)
         # normal section
         for i in range(0, MAIN_HEIGHT + 1):
             for j in range(0, MAIN_WIDTH + 1):
