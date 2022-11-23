@@ -32,12 +32,14 @@ class CoreGame:
     mines_set: bool = field(init=False, default=False)
     tick_start: int = field(init=False, default=None)
 
-    font: pygame.font.SysFont = field(init=False)
-    font_nerd: pygame.font.SysFont = field(init=False)
+    font: pygame.font.Font = field(init=False)
+    font_nerd: pygame.font.Font = field(init=False)
+    font_nerd_big: pygame.font.Font = field(init=False)
 
     def __post_init__(self):
         self.font = pygame.font.Font('assets/liberationserif.ttf', 24)
         self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 24)
+        self.font_nerd_big = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
 
     @property
     def x_0(self) -> float:
@@ -158,15 +160,22 @@ class CoreGame:
 
     #
 
-    def show_all_mines(self, win: bool = False) -> None:
-        """Shows all mines"""
+    def show_all_mines_winning(self) -> None:
+        """Shows all mines for a win. All mined locations are flagged."""
         for tile in self.board:
-            if (self.board[tile].mined
-                    and self.board[tile].flag != FlagType.POST_GAME_LOSS_CAUSE  # don't replace this
-                    and self.board[tile].flag != FlagType.FLAGGED):  # correctly flagged (not question) tiles keep their flags
-                # TODO: when losing, change CORRECT question flags to normal flags
+            if self.board[tile].mined:
                 assert self.board[tile].closed
-                self.board[tile].flag = FlagType.FLAGGED if win else FlagType.POST_GAME_LOSS
+                self.board[tile].flag = FlagType.FLAGGED
+
+    def show_all_mines_losing(self) -> None:
+        """Shows all mines for a loss."""
+        for tile in self.board:
+            if self.board[tile].mined:
+                if self.board[tile].flag == FlagType.QUESTION:
+                    self.board[tile].flag = FlagType.FLAGGED
+                elif self.board[tile].flag not in {FlagType.FLAGGED, FlagType.POST_GAME_LOSS_CAUSE}:
+                    # POST_GAME_LOSS_CAUSE was set already, and correctly flagged mines keep their flags
+                    self.board[tile].flag = FlagType.POST_GAME_LOSS
 
     def check_victory(self) -> bool:
         """Check if you win or not."""
@@ -176,18 +185,20 @@ class CoreGame:
 
     def handle_victory(self) -> None:
         """Handle a win."""
-        self.show_all_mines(win=True)
+        self.show_all_mines_winning()
         self.draw_all()
 
     def handle_defeat(self) -> None:
         """Handle a loss."""
-        self.show_all_mines(win=False)
+        self.show_all_mines_losing()
         self.draw_all(show_flagged_incorrect=True)
 
     #
 
     def draw_all(self, show_flagged_incorrect: bool = False) -> None:
-        """Draw the tiles."""
+        """Draw the tiles.
+        :show_flagged_incorrect: After finishing the game, show incorrect flags.
+        """
         # mine count
         self.canvas.blit(self.font_nerd.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x00ff00ff), (5, 5))
         # timer
@@ -219,13 +230,15 @@ class CoreGame:
                 # question flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf128', True, 0x00aaaaff), x, y)
+                if state.safe and show_flagged_incorrect:
+                    draw_centered_text(self.canvas, self.font_nerd_big.render('\u2717', True, 0xff5555ff), x, y)
 
             elif state.flag == FlagType.FLAGGED:
                 # flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0x55ffffff), x, y)
-                if state.safe and show_flagged_incorrect:  # avoid giving away whether flags are right or not
-                    draw_centered_text(self.canvas, self.font_nerd.render('\u2717', True, 0xff5555ff), x, y)
+                if state.safe and show_flagged_incorrect:
+                    draw_centered_text(self.canvas, self.font_nerd_big.render('\u2717', True, 0xff5555ff), x, y)
 
             elif state.closed:
                 # closed (& unmarked) tile
