@@ -33,6 +33,7 @@ class CoreGame:
     board: dict[tuple[int, int], Tile] = field(init=False, default_factory=dict)
     mines_set: bool = field(init=False, default=False)
     tick_start: int = field(init=False, default=None)
+    frozen_timer_ticks: int = field(init=False, default=None)
     game_won: bool = field(init=False, default=False)  # managed by other classes
 
     font: pygame.font.Font = field(init=False)
@@ -217,12 +218,14 @@ class CoreGame:
         # timer
         if self.tick_start is None:
             draw_right_align_text(self.canvas, self.font_nerd_20.render('\uf64f', True, 0x5555ffff),
-                                  self.main.x_size-10, 5)
+                                  self.main.x_size-5, 5)
         else:
-            seconds = (self.main.number_tick - self.tick_start) // self.main.TPS
+            ticks_passed = self.main.number_tick - self.tick_start if self.frozen_timer_ticks is None  \
+                           else self.frozen_timer_ticks
+            seconds = ticks_passed // self.main.TPS
             time_text = f'\uf64f {seconds // 60:02d}:{seconds % 60:02d}'
             draw_right_align_text(self.canvas, self.font_nerd_20.render(time_text, True, 0x5555ffff),
-                                  self.main.x_size-10, 5)
+                                  self.main.x_size-5, 5)
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)

@@ -153,6 +153,8 @@ class Game:
             clear_canvas(self.canvas)
             self.core.draw_all()
         elif self.playing == Playing.ENDING:
+            if self.core.frozen_timer_ticks is None:  # freeze the timer if we haven't already
+                self.core.frozen_timer_ticks = self.main.number_tick - self.core.tick_start
             clear_canvas(self.canvas)
             self.core.draw_all()
             self.run_result_menu()
@@ -180,13 +182,13 @@ class Game:
                     clear_canvas(self.canvas)
                     self.core.handle_defeat()
                     self.core.game_won = False
-                    return
-                game_won = self.core.check_victory()
-                if game_won:
-                    self.playing = Playing.ENDING
-                    clear_canvas(self.canvas)
-                    self.core.handle_victory()
-                    self.core.game_won = True
+                else:
+                    game_won = self.core.check_victory()
+                    if game_won:
+                        self.playing = Playing.ENDING
+                        clear_canvas(self.canvas)
+                        self.core.handle_victory()
+                        self.core.game_won = True
 
         elif self.playing == Playing.ENDING:
             if event.type == pygame.MOUSEBUTTONDOWN:
