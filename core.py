@@ -83,8 +83,8 @@ class CoreGame:
         """Convert game i,j to canvas x,y."""
         # Slightly larger than 2*apothem, so they're almost touching but not quite.
         # Since `i` is (0; 1) and `j` is (sqrt3/2; 1/2), we matrix multiply.
-        x = self.x_0 + self.size * (0.8660254037844386 * game_j)
-        y = self.y_0 + self.size * (game_i + 0.5 * game_j)
+        x = self.x_0 + self.size * (0.8660254037844386*game_j)
+        y = self.y_0 + self.size * (game_i + 0.5*game_j)
         return x, y
 
     def _to_game(self, canvas_x: int, canvas_y: int) -> tuple[float, float]:
@@ -92,8 +92,8 @@ class CoreGame:
         x = (canvas_x - self.x_0) / self.size
         y = (canvas_y - self.y_0) / self.size
         # multiply by inverse (-1/sqrt3, 1 ; -2/sqrt3, 0)
-        game_i = -0.5773502691896258 * x + y
-        game_j = 1.1547005383792517 * x
+        game_i = -0.5773502691896258*x + y
+        game_j = 1.1547005383792517*x
         return game_i, game_j
 
     def _get_nearby_mines(self, i: int, j: int) -> int:
@@ -152,24 +152,24 @@ class CoreGame:
     def init(self) -> None:
         """Draw and initialize stuff, in-place."""
         MAIN_WIDTH = self.width - 1
-        MAIN_HEIGHT = self.height - MAIN_WIDTH // 2 - 1
+        MAIN_HEIGHT = self.height - MAIN_WIDTH//2 - 1
         assert MAIN_WIDTH % 2 == 0
         # top section
-        for i in range(-MAIN_WIDTH // 2, 0):
+        for i in range(-MAIN_WIDTH//2, 0):
             j_min = -2 * i
             j_max = MAIN_WIDTH
-            for j in range(j_min, j_max + 1):
+            for j in range(j_min, j_max+1):
                 self.board[(i, j)] = Tile()
         # normal section
-        for i in range(0, MAIN_HEIGHT + 1):
-            for j in range(0, MAIN_WIDTH + 1):
+        for i in range(0, MAIN_HEIGHT+1):
+            for j in range(0, MAIN_WIDTH+1):
                 self.board[(i, j)] = Tile()
         # bottom section
-        for i in range(MAIN_HEIGHT + 1, MAIN_HEIGHT + MAIN_WIDTH // 2 + 1):
+        for i in range(MAIN_HEIGHT+1, MAIN_HEIGHT + MAIN_WIDTH//2 + 1):
             j_min = 0
             n = i - MAIN_HEIGHT
-            j_max = MAIN_WIDTH - 2 * n
-            for j in range(j_min, j_max + 1):
+            j_max = MAIN_WIDTH - 2*n
+            for j in range(j_min, j_max+1):
                 self.board[(i, j)] = Tile()
 
     def set_mines(self, remove_this: tuple[int, int]) -> None:
