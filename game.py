@@ -39,6 +39,17 @@ class Game:
     last_game_mode: str = field(init=False, default=None)
     endpoint: int = field(init=False, default=0)
 
+    font_30: pygame.font.Font = field(init=False)
+    font_42: pygame.font.Font = field(init=False)
+    font_50: pygame.font.Font = field(init=False)
+    font_60: pygame.font.Font = field(init=False)
+
+    def __post_init__(self):
+        self.font_30 = pygame.font.Font('assets/liberationserif.ttf', 30)
+        self.font_42 = pygame.font.Font('assets/liberationserif.ttf', 42)
+        self.font_50 = pygame.font.Font('assets/liberationserif.ttf', 50)
+        self.font_60 = pygame.font.Font('assets/liberationserif.ttf', 60)
+
     # Bounding boxes for the buttons. These need to be dynamically calculated due to the window size.
 
     @property
@@ -74,33 +85,31 @@ class Game:
     def run_menu(self) -> None:
         self.playing = Playing.MENU
         clear_canvas(self.canvas)
-        font = pygame.font.Font('assets/liberationserif.ttf', 50)
         # title
-        draw_centered_text(self.canvas, font.render('HEXAMINE', True, 0xff55ffff),
+        draw_centered_text(self.canvas, self.font_60.render('HEXAMINE', True, 0xff55ffff),
                            self.main.x_center, 90)
-        draw_hexagon(self.canvas, self.main.x_center-200, 90, 37.5, 0xff55ff)
-        draw_hexagon(self.canvas, self.main.x_center+200, 90, 37.5, 0xff55ff)
+        draw_hexagon(self.canvas, self.main.x_center-230, 90, 37.5, 0xff55ff)
+        draw_hexagon(self.canvas, self.main.x_center+230, 90, 37.5, 0xff55ff)
         # difficulty buttons
         draw.rect(self.canvas, 0x00aa00, self.easy_rect)
-        draw_centered_text(self.canvas, font.render('Easy Difficulty', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_42.render('Easy Difficulty', True, 0xffffffff),
                            self.main.x_center, 250)
         draw.rect(self.canvas, 0xffaa00, self.medium_rect)
-        draw_centered_text(self.canvas, font.render('Medium Difficulty', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_42.render('Medium Difficulty', True, 0xffffffff),
                            self.main.x_center, 375)
         draw.rect(self.canvas, 0xaa0000, self.hard_rect)
-        draw_centered_text(self.canvas, font.render('Hard Difficulty', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_42.render('Hard Difficulty', True, 0xffffffff),
                            self.main.x_center, 500)
 
     def run_result_menu(self) -> None:
-        font = pygame.font.Font('assets/liberationserif.ttf', 30)
         draw.rect(self.canvas, 0x00aa00, self.again_rect)
-        draw_centered_text(self.canvas, font.render('Play Again', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_30.render('Play Again', True, 0xffffffff),
                            self.main.x_center, self.main.y_size-25)
         draw.rect(self.canvas, 0x00aa00, self.menu_rect)
-        draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_30.render('Main Menu', True, 0xffffffff),
                            self.main.x_center-RESULT_X_OFFSET, self.main.y_size-25)
         draw.rect(self.canvas, 0x00aa00, self.score_rect)
-        draw_centered_text(self.canvas, font.render('Leaderboards', True, 0xffffffff),
+        draw_centered_text(self.canvas, self.font_30.render('Leaderboards', True, 0xffffffff),
                            self.main.x_center+RESULT_X_OFFSET, self.main.y_size-25)
 
     def run_easy_difficulty(self) -> None:
@@ -147,11 +156,8 @@ class Game:
             clear_canvas(self.canvas)
             self.core.draw_all()
             self.run_result_menu()
-            font = pygame.font.Font('assets/liberationserif.ttf', 50)
-            if self.core.game_won:
-                draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), self.main.x_center, 35)
-            else:
-                draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), self.main.x_center, 35)
+            text = 'YOU WON!' if self.core.game_won else 'GAME OVER'
+            draw_centered_text(self.canvas, self.font_50.render(text, True, 0xff55ffff), self.main.x_center, 35)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
