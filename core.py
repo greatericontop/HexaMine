@@ -68,8 +68,8 @@ class CoreGame:
     def hexagon_radius(self) -> float:
         # need to subtract BORDER_BUFFER/2 because there's (approximately) 1 border buffer for each hexagon
         # both of these are approximations, but they get close enough that the difference is irrelevant
-        x_limit = (self.main.x_size - 40) / ((self.width-1)*1.5 + 2) - BORDER_BUFFER/2
-        y_limit = (self.main.y_size - 125) / (self.height * 1.7320508075688772) - BORDER_BUFFER/2
+        x_limit = (self.main.x_size - 50) / ((self.width-1)*1.5 + 2) - BORDER_BUFFER/2
+        y_limit = (self.main.y_size - 140) / (self.height * 1.7320508075688772) - BORDER_BUFFER/2
         return min(x_limit, y_limit)
 
     @property

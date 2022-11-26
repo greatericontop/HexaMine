@@ -149,9 +149,9 @@ class Game:
             self.run_result_menu()
             font = pygame.font.Font('assets/liberationserif.ttf', 50)
             if self.core.game_won:
-                draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), self.main.x_center, 40)
+                draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), self.main.x_center, 35)
             else:
-                draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), self.main.x_center, 40)
+                draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), self.main.x_center, 35)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
