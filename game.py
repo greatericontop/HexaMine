@@ -157,7 +157,7 @@ class Game:
             if self.core.frozen_timer_ticks is None:  # freeze the timer if we haven't already
                 self.core.frozen_timer_ticks = self.main.number_tick - self.core.tick_start
             clear_canvas(self.canvas)
-            self.core.draw_all(show_flagged_incorrect=True)
+            self.core.draw_all(game_ended=True)
             self.run_result_menu()
             text = 'YOU WON!' if self.core.game_won else 'GAME OVER'
             draw_centered_text(self.canvas, self.font_50.render(text, True, 0xff55ffff), self.main.x_center, 35)

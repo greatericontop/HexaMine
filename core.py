@@ -125,10 +125,25 @@ class CoreGame:
                 return False
         return True
 
-    def _estimated_mines_remaining(self) -> int:
-        """Get the estimated (flags) count of mines left."""
-        flags = len([None for tile in self.board if self.board[tile].flag == FlagType.FLAGGED])
-        return self.mine_count - flags
+    def estimated_mines_remaining(self) -> tuple[int, int, int]:
+        """Get the estimated (flags) count of mines left.
+        Return a tuple of
+            0. the mine count with only full flags
+            1. the mine count also including question flags
+            2. the number of incorrect full flags (NOT including questions)
+        """
+        strict_flags = 0
+        questions = 0
+        incorrect_strict_flags = 0
+        for tile in self.board.values():
+            if tile.flag == FlagType.FLAGGED:
+                strict_flags += 1
+                questions += 1
+                if tile.safe:
+                    incorrect_strict_flags += 1
+            elif tile.flag == FlagType.QUESTION:
+                questions += 1
+        return self.mine_count - strict_flags, self.mine_count - questions, incorrect_strict_flags
 
     #
     #
@@ -210,12 +225,21 @@ class CoreGame:
 
     #
 
-    def draw_all(self, show_flagged_incorrect: bool = False) -> None:
+    def draw_all(self, game_ended: bool = False) -> None:
         """Draw the tiles.
         :show_flagged_incorrect: After finishing the game, show incorrect flags.
         """
         # mine count
-        self.canvas.blit(self.font_nerd_20.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x11ff11ff), (5, 5))
+        strict_mines, question_mines, incorrectly_flagged = self.estimated_mines_remaining()
+        if game_ended:
+            # when winning, the win handler flags everything and this should be zero
+            # when losing, this will display the number of undiscovered mines (how close you were to winning)
+            mine_count_text = f'{strict_mines+incorrectly_flagged} \ufb8f'
+        elif strict_mines == question_mines or strict_mines <= 0:
+            mine_count_text = f'{strict_mines} \ufb8f'
+        else:  # only show if different and if there are still mines left that weren't strict flagged
+            mine_count_text = f'{strict_mines} ({question_mines}) \ufb8f'
+        self.canvas.blit(self.font_nerd_20.render(mine_count_text, True, 0x11ff11ff), (5, 5))
         # timer
         if self.tick_start is None:
             draw_right_align_text(self.canvas, self.font_nerd_20.render('\uf64f', True, 0x5555ffff),
@@ -249,14 +273,14 @@ class CoreGame:
                 # question flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf128', True, 0x00aaaaff), x, y)
-                if state.safe and show_flagged_incorrect:
+                if state.safe and game_ended:
                     draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff3333ff), x, y)
 
             elif state.flag == FlagType.FLAGGED:
                 # flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0x55ffffff), x, y)
-                if state.safe and show_flagged_incorrect:
+                if state.safe and game_ended:
                     draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff3333ff), x, y)
 
             elif state.closed:
