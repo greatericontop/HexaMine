@@ -40,6 +40,7 @@ class CoreGame:
     font_nerd_20: pygame.font.Font = field(init=False)
     font_nerd: pygame.font.Font = field(init=False)
     font_nerd_28: pygame.font.Font = field(init=False)
+    font_nerd_34: pygame.font.Font = field(init=False)
 
     def __post_init__(self):
         self.font = pygame.font.Font('assets/liberationserif.ttf', 24)
@@ -47,6 +48,7 @@ class CoreGame:
         self.font_nerd_20 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 20)
         self.font_nerd = pygame.font.Font('assets/jetbrainsmononerd.ttf', 24)
         self.font_nerd_28 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 28)
+        self.font_nerd_34 = pygame.font.Font('assets/jetbrainsmononerd.ttf', 34)
 
     @property
     def x_0(self) -> float:
@@ -235,7 +237,7 @@ class CoreGame:
 
             elif state.flag == FlagType.POST_GAME_LOSS_CAUSE:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xaa0000)
-                draw_centered_text(self.canvas, self.font_nerd_28.render('\ufb8f', True, 0xaa0000ff), x, y)
+                draw_centered_text(self.canvas, self.font_nerd_34.render('\ufb8f', True, 0xaa0000ff), x, y)
 
             # during game
 
@@ -262,7 +264,9 @@ class CoreGame:
                 nearby_mine_count = self._get_nearby_mines(i, j)
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, HEX_COLOR[nearby_mine_count])
                 if nearby_mine_count != 0:
-                    draw_centered_text(self.canvas, self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count]), x, y)
+                    draw_centered_text(self.canvas,
+                                       self.font.render(str(nearby_mine_count), True, MINE_COLOR[nearby_mine_count]),
+                                       x, y)
                 else:
                     draw_centered_text(self.canvas, self.font_nerd_16.render('\ueaab', True, 0x666666ff), x, y)
 
