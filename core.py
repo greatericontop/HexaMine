@@ -31,6 +31,7 @@ class CoreGame:
     board: dict[tuple[int, int], Tile] = field(init=False, default_factory=dict)
     mines_set: bool = field(init=False, default=False)
     tick_start: int = field(init=False, default=None)
+    game_won: bool = field(init=False, default=False)  # managed by other classes
 
     font: pygame.font.Font = field(init=False)
     font_nerd_16: pygame.font.Font = field(init=False)

@@ -33,41 +33,51 @@ class Playing(enum.Enum):
 class Game:
     main: Main
     canvas: pygame.Surface
+
     core: CoreGame = field(init=False, default=None)
     playing: Playing = field(init=False, default=Playing.MENU)
     last_game_mode: str = field(init=False, default=None)
     endpoint: int = field(init=False, default=0)
 
     def __post_init__(self):
-        self.easy_rect = pygame.Rect(self.main.x_center - TITLE_W, 250 - TITLE_H, 2 * TITLE_W, 2 * TITLE_H)
-        self.medium_rect = pygame.Rect(self.main.x_center - TITLE_W, 375 - TITLE_H, 2 * TITLE_W, 2 * TITLE_H)
-        self.hard_rect = pygame.Rect(self.main.x_center - TITLE_W, 500 - TITLE_H, 2 * TITLE_W, 2 * TITLE_H)
-        self.again_rect = pygame.Rect(self.main.x_center - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
-        self.menu_rect = pygame.Rect(self.main.x_center - RESULT_X_OFFSET - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
-        self.score_rect = pygame.Rect(self.main.x_center + RESULT_X_OFFSET - RESULT_W, 575 - RESULT_H, 2 * RESULT_W, 2 * RESULT_H)
+        self.easy_rect = pygame.Rect(self.main.x_center-TITLE_W, 250-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+        self.medium_rect = pygame.Rect(self.main.x_center-TITLE_W, 375-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+        self.hard_rect = pygame.Rect(self.main.x_center-TITLE_W, 500-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+        self.again_rect = pygame.Rect(self.main.x_center-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
+        self.menu_rect = pygame.Rect(self.main.x_center-RESULT_X_OFFSET-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
+        self.score_rect = pygame.Rect(self.main.x_center+RESULT_X_OFFSET-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
 
     def run_menu(self) -> None:
         self.playing = Playing.MENU
         clear_canvas(self.canvas)
         font = pygame.font.Font('assets/liberationserif.ttf', 50)
-        draw_centered_text(self.canvas, font.render('HEXAMINE', True, 0xff55ffff), self.main.x_center, 90)
+        # title
+        draw_centered_text(self.canvas, font.render('HEXAMINE', True, 0xff55ffff),
+                           self.main.x_center, 90)
         draw_hexagon(self.canvas, self.main.x_center-200, 90, 37.5, 0xff55ff)
         draw_hexagon(self.canvas, self.main.x_center+200, 90, 37.5, 0xff55ff)
+        # difficulty buttons
         draw.rect(self.canvas, 0x00aa00, self.easy_rect)
-        draw_centered_text(self.canvas, font.render('Easy Difficulty', True, 0xffffffff), self.main.x_center, 250)
+        draw_centered_text(self.canvas, font.render('Easy Difficulty', True, 0xffffffff),
+                           self.main.x_center, 250)
         draw.rect(self.canvas, 0xffaa00, self.medium_rect)
-        draw_centered_text(self.canvas, font.render('Medium Difficulty', True, 0xffffffff), self.main.x_center, 375)
+        draw_centered_text(self.canvas, font.render('Medium Difficulty', True, 0xffffffff),
+                           self.main.x_center, 375)
         draw.rect(self.canvas, 0xaa0000, self.hard_rect)
-        draw_centered_text(self.canvas, font.render('Hard Difficulty', True, 0xffffffff), self.main.x_center, 500)
+        draw_centered_text(self.canvas, font.render('Hard Difficulty', True, 0xffffffff),
+                           self.main.x_center, 500)
 
     def run_result_menu(self) -> None:
         font = pygame.font.Font('assets/liberationserif.ttf', 30)
         draw.rect(self.canvas, 0x00aa00, self.again_rect)
-        draw_centered_text(self.canvas, font.render('Play Again', True, 0xffffffff), self.main.x_center, 575)
+        draw_centered_text(self.canvas, font.render('Play Again', True, 0xffffffff),
+                           self.main.x_center, 575)
         draw.rect(self.canvas, 0x00aa00, self.menu_rect)
-        draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff), self.main.x_center - RESULT_X_OFFSET, 575)
+        draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff),
+                           self.main.x_center-RESULT_X_OFFSET, 575)
         draw.rect(self.canvas, 0x00aa00, self.score_rect)
-        draw_centered_text(self.canvas, font.render('Leaderboards', True, 0xffffffff), self.main.x_center + RESULT_X_OFFSET, 575)
+        draw_centered_text(self.canvas, font.render('Leaderboards', True, 0xffffffff),
+                           self.main.x_center+RESULT_X_OFFSET, 575)
 
     def run_easy_difficulty(self) -> None:
         self.playing = Playing.CORE_GAME
@@ -99,10 +109,23 @@ class Game:
     #
 
     def tick_loop(self) -> None:
-        """Called every tick loop."""
-        if self.playing == Playing.CORE_GAME:
+        """Called every tick/frame.
+        Redrawing the canvas is mandatory here (otherwise funny things happen when resizing).
+        """
+        if self.playing == Playing.MENU:
+            self.run_menu()
+        elif self.playing == Playing.CORE_GAME:
             clear_canvas(self.canvas)
             self.core.draw_all()
+        elif self.playing == Playing.ENDING:
+            clear_canvas(self.canvas)
+            self.core.draw_all()
+            self.run_result_menu()
+            font = pygame.font.Font('assets/liberationserif.ttf', 50)
+            if self.core.game_won:
+                draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), self.main.x_center, 40)
+            else:
+                draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), self.main.x_center, 40)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle an event."""
@@ -124,21 +147,16 @@ class Game:
                     self.playing = Playing.ENDING
                     clear_canvas(self.canvas)
                     self.core.handle_defeat()
-                    self.core = None
-                    font = pygame.font.Font('assets/liberationserif.ttf', 50)
-                    draw_centered_text(self.canvas, font.render('GAME OVER', True, 0xff55ffff), self.main.x_center, 40)
+                    self.core.game_won = False
                     return
                 game_won = self.core.check_victory()
                 if game_won:
                     self.playing = Playing.ENDING
                     clear_canvas(self.canvas)
                     self.core.handle_victory()
-                    self.core = None
-                    font = pygame.font.Font('assets/liberationserif.ttf', 50)
-                    draw_centered_text(self.canvas, font.render('YOU WON!', True, 0xff55ffff), self.main.x_center, 40)
+                    self.core.game_won = True
 
         elif self.playing == Playing.ENDING:
-            self.run_result_menu()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.again_rect.collidepoint(mouse_pos):
