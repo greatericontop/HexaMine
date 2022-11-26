@@ -14,7 +14,7 @@ import pygame
 from game import Game
 
 
-WINDOW_FLAGS = pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF
+WINDOW_FLAGS = pygame.RESIZABLE
 
 
 @dataclass
