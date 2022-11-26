@@ -13,7 +13,7 @@ class FlagType(enum.Enum):
     OPEN = 0  # tile has been opened
     NONE_CLOSED = 1  # tile is closed and not marked
     FLAGGED = 2  # tile is flagged
-    QUESTION = 3  # TODO
+    QUESTION = 3  # tile is question flagged
     POST_GAME_LOSS = 4  # shows mines post-game loss (does nothing to safe tiles)
     POST_GAME_LOSS_CAUSE = 5  # shows the mine you clicked on that made you lose
 

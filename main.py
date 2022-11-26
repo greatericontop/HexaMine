@@ -20,7 +20,7 @@ WINDOW_FLAGS = pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF
 @dataclass
 class Main:
     TPS: ClassVar[int] = 60
-    x_size: int = 800  # TODO: make these resizable (with a minimum of 800x600) later
+    x_size: int = 800
     y_size: int = 600
 
     number_tick: int = field(init=False, default=0)

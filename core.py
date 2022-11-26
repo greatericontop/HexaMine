@@ -131,6 +131,8 @@ class CoreGame:
         return self.mine_count - flags
 
     #
+    #
+    #
 
     def init(self) -> None:
         """Draw and initialize stuff, in-place."""
@@ -143,7 +145,6 @@ class CoreGame:
             j_max = MAIN_WIDTH
             for j in range(j_min, j_max + 1):
                 self.board[(i, j)] = Tile()
-                x, y = self._to_canvas(i, j)
         # normal section
         for i in range(0, MAIN_HEIGHT + 1):
             for j in range(0, MAIN_WIDTH + 1):
@@ -172,6 +173,8 @@ class CoreGame:
             assert self.board[coordinate].closed
             self.board[coordinate].tile = TileType.MINE if i < self.mine_count else TileType.SAFE
 
+    #
+    #
     #
 
     def show_all_mines_winning(self) -> None:

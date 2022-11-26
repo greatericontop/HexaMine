@@ -23,6 +23,7 @@ RESULT_W = 85
 RESULT_H = 20
 RESULT_X_OFFSET = 180
 
+
 class Playing(enum.Enum):
     MENU = 0
     CORE_GAME = 1
