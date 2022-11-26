@@ -39,13 +39,37 @@ class Game:
     last_game_mode: str = field(init=False, default=None)
     endpoint: int = field(init=False, default=0)
 
-    def __post_init__(self):
-        self.easy_rect = pygame.Rect(self.main.x_center-TITLE_W, 250-TITLE_H, 2*TITLE_W, 2*TITLE_H)
-        self.medium_rect = pygame.Rect(self.main.x_center-TITLE_W, 375-TITLE_H, 2*TITLE_W, 2*TITLE_H)
-        self.hard_rect = pygame.Rect(self.main.x_center-TITLE_W, 500-TITLE_H, 2*TITLE_W, 2*TITLE_H)
-        self.again_rect = pygame.Rect(self.main.x_center-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
-        self.menu_rect = pygame.Rect(self.main.x_center-RESULT_X_OFFSET-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
-        self.score_rect = pygame.Rect(self.main.x_center+RESULT_X_OFFSET-RESULT_W, 575-RESULT_H, 2*RESULT_W, 2*RESULT_H)
+    # Bounding boxes for the buttons. These need to be dynamically calculated due to the window size.
+
+    @property
+    def easy_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center-TITLE_W, 250-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+
+    @property
+    def medium_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center-TITLE_W, 375-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+
+    @property
+    def hard_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center-TITLE_W, 500-TITLE_H, 2*TITLE_W, 2*TITLE_H)
+
+    @property
+    def again_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center-RESULT_W, self.main.y_size-25-RESULT_H, 2*RESULT_W, 2*RESULT_H)
+
+    @property
+    def menu_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center-RESULT_X_OFFSET-RESULT_W, self.main.y_size-25-RESULT_H,
+                           2*RESULT_W, 2*RESULT_H)
+
+    @property
+    def score_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.main.x_center+RESULT_X_OFFSET-RESULT_W, self.main.y_size-25-RESULT_H,
+                           2*RESULT_W, 2*RESULT_H)
+
+    #
+    #
+    #
 
     def run_menu(self) -> None:
         self.playing = Playing.MENU
@@ -71,13 +95,13 @@ class Game:
         font = pygame.font.Font('assets/liberationserif.ttf', 30)
         draw.rect(self.canvas, 0x00aa00, self.again_rect)
         draw_centered_text(self.canvas, font.render('Play Again', True, 0xffffffff),
-                           self.main.x_center, 575)
+                           self.main.x_center, self.main.y_size-25)
         draw.rect(self.canvas, 0x00aa00, self.menu_rect)
         draw_centered_text(self.canvas, font.render('Main Menu', True, 0xffffffff),
-                           self.main.x_center-RESULT_X_OFFSET, 575)
+                           self.main.x_center-RESULT_X_OFFSET, self.main.y_size-25)
         draw.rect(self.canvas, 0x00aa00, self.score_rect)
         draw_centered_text(self.canvas, font.render('Leaderboards', True, 0xffffffff),
-                           self.main.x_center+RESULT_X_OFFSET, 575)
+                           self.main.x_center+RESULT_X_OFFSET, self.main.y_size-25)
 
     def run_easy_difficulty(self) -> None:
         self.playing = Playing.CORE_GAME
@@ -106,6 +130,8 @@ class Game:
         self.core = CoreGame(self.main, self.canvas, width, height, mine_count)
         self.core.init()
 
+    #
+    #
     #
 
     def tick_loop(self) -> None:

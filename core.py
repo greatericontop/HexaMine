@@ -64,7 +64,7 @@ class CoreGame:
 
     @property
     def hexagon_radius(self) -> float:
-        return (self.main.display_height - 115) / (self.height * 2)
+        return (self.main.y_size - 115) / (self.height * 2)
 
     @property
     def size(self) -> float:
@@ -208,11 +208,13 @@ class CoreGame:
         self.canvas.blit(self.font_nerd_20.render(f'{self._estimated_mines_remaining()} \ufb8f', True, 0x11ff11ff), (5, 5))
         # timer
         if self.tick_start is None:
-            draw_right_align_text(self.canvas, self.font_nerd_20.render('\uf64f', True, 0x5555ffff), 795, 5)
+            draw_right_align_text(self.canvas, self.font_nerd_20.render('\uf64f', True, 0x5555ffff),
+                                  self.main.x_size-10, 5)
         else:
             seconds = (self.main.number_tick - self.tick_start) // self.main.TPS
             time_text = f'\uf64f {seconds // 60:02d}:{seconds % 60:02d}'
-            draw_right_align_text(self.canvas, self.font_nerd_20.render(time_text, True, 0x5555ffff), 795, 5)
+            draw_right_align_text(self.canvas, self.font_nerd_20.render(time_text, True, 0x5555ffff),
+                                  self.main.x_size-10, 5)
 
         for (i, j), state in self.board.items():
             x, y = self._to_canvas(i, j)

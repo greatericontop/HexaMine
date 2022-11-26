@@ -20,25 +20,25 @@ WINDOW_FLAGS = pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF
 @dataclass
 class Main:
     TPS: ClassVar[int] = 60
-    display_width: int = 800  # TODO: make these resizable (with a minimum of 800x600) later
-    display_height: int = 600
+    x_size: int = 800  # TODO: make these resizable (with a minimum of 800x600) later
+    y_size: int = 600
 
     number_tick: int = field(init=False, default=0)
 
     @property
     def x_center(self) -> int:
-        return self.display_width // 2
+        return self.x_size // 2
 
     @property
     def y_center(self) -> int:
-        return self.display_height // 2
+        return self.y_size // 2
 
     def main(self) -> None:
         pygame.init()
         logo = pygame.image.load('assets/logo.png')
         pygame.display.set_icon(logo)
         pygame.display.set_caption(f'HexaMine {__version__}')
-        canvas = pygame.display.set_mode((self.display_width, self.display_height), WINDOW_FLAGS)
+        canvas = pygame.display.set_mode((self.x_size, self.y_size), WINDOW_FLAGS)
         clock = pygame.time.Clock()
 
         game = Game(self, canvas)
@@ -54,8 +54,8 @@ class Main:
                     pygame.quit()
                     return
                 if event.type == pygame.VIDEORESIZE:
-                    self.display_width = event.w
-                    self.display_height = event.h
+                    self.x_size = event.w
+                    self.y_size = event.h
                     # while we would love to have a minimum size, that literally does not work in pygame
                 game.handle_event(event)
 
