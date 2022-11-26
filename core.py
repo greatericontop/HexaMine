@@ -200,12 +200,10 @@ class CoreGame:
     def handle_victory(self) -> None:
         """Handle a win."""
         self.show_all_mines_winning()
-        self.draw_all()
 
     def handle_defeat(self) -> None:
         """Handle a loss."""
         self.show_all_mines_losing()
-        self.draw_all(show_flagged_incorrect=True)
 
     #
 
@@ -249,14 +247,14 @@ class CoreGame:
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf128', True, 0x00aaaaff), x, y)
                 if state.safe and show_flagged_incorrect:
-                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff5555ff), x, y)
+                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff3333ff), x, y)
 
             elif state.flag == FlagType.FLAGGED:
                 # flagged (& closed) tile
                 draw_hexagon(self.canvas, x, y, self.hexagon_radius, 0xffa2a2)
                 draw_centered_text(self.canvas, self.font_nerd.render('\uf73f', True, 0x55ffffff), x, y)
                 if state.safe and show_flagged_incorrect:
-                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff5555ff), x, y)
+                    draw_centered_text(self.canvas, self.font_nerd_28.render('\u2717', True, 0xff3333ff), x, y)
 
             elif state.closed:
                 # closed (& unmarked) tile
